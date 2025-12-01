@@ -26,7 +26,6 @@ export default function Home() {
     }
   };
 
-  // Parse actions string into individual lines/items
   const sanitizeDisplay = (s: string | undefined): string => {
     if (!s) return "";
     let t = String(s);

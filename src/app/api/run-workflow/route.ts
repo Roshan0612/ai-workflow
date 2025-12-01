@@ -7,7 +7,6 @@ function sanitizeForJSON(s: string): string {
 
 function extractFromResult(result: any, key: string): string {
   if (!result) return "";
-  // Try top-level, then nested `state` or `result` containers
   const candidates = [result[key], result?.state?.[key], result?.result?.[key], result?.output?.[key]];
   for (const c of candidates) {
     if (c === undefined || c === null) continue;
