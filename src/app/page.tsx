@@ -1,55 +1,48 @@
 "use client";
-
 import { useState } from "react";
 
 export default function Home() {
   const [input, setInput] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [output, setOutput] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  async function run() {
-    const res = await fetch("/api/run-workflow", {
-      method: "POST",
-      body: JSON.stringify({ text: input }),
-    });
+  const runWorkflow = async () => {
+    setLoading(true);
+    setOutput(null);
 
-    const data = await res.json();
-    setResult(data);
-  }
+    try {
+      const res = await fetch("/api/run-workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input }),
+      });
+
+      const data = await res.json().catch(() => ({ error: "Invalid JSON returned" }));
+      setOutput(data);
+    } catch (err: any) {
+      setOutput({ error: err.message });
+    }
+
+    setLoading(false);
+  };
 
   return (
-    <main style={{ padding: "2rem", maxWidth: 800, margin: "0 auto" }}>
+    <main style={{ padding: 50 }}>
       <h1>AI Workflow Assistant</h1>
-
       <textarea
+        style={{ width: "100%", height: 120, marginTop: 20 }}
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter your text..."
-        rows={6}
-        style={{
-          width: "100%",
-          padding: "10px",
-          marginTop: "1rem",
-        }}
+        placeholder="Type your text here..."
       />
-
-      <button
-        onClick={run}
-        style={{
-          marginTop: "1rem",
-          padding: "10px 15px",
-        }}
-      >
-        Run Workflow
+      <button style={{ marginTop: 10 }} onClick={runWorkflow} disabled={loading}>
+        {loading ? "Running..." : "Run Workflow"}
       </button>
 
-      {result && (
-        <div style={{ marginTop: "2rem" }}>
-          <h2>Summary</h2>
-          <p>{result.summary}</p>
-
-          <h2>Action Points</h2>
-          <p>{result.actions}</p>
-        </div>
+      {output && (
+        <pre style={{ marginTop: 20, background: "#eee", padding: 20 }}>
+          {JSON.stringify(output, null, 2)}
+        </pre>
       )}
     </main>
   );
